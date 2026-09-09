@@ -12,7 +12,7 @@ jobs:
       CCACHE_NOHASHDIR: "true"
       CCACHE_MAXSIZE: "10G"
       CCACHE_HARDLINK: "true"
-      ORG_GRADLE_JVMARGS: "-Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+      ORG_GRADLE_JVMARGS: "-Xmx4g -Xss32m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,13 +20,27 @@ jobs:
           fetch-depth: 1
           token: ${{ github.token }}
 
-      - name: Kill proprietary submodule completely
+      - name: Remove proprietary submodule and Create Stubs
         run: |
-          git submodule deinit -f TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary || true
+          git config -f .gitmodules --remove-section submodule."TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary" || true
           git rm -f TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary || true
           rm -rf .git/modules/TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary || true
-          git config -f .gitmodules --remove-section submodule."TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary" || true
+          
           mkdir -p TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary
+          
+          cat << 'EOF' > TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary/AyuHistoryHook.java
+          package com.radolyn.ayugram.proprietary;
+          public class AyuHistoryHook {
+              public static boolean isEnabled() { return true; }
+          }
+          EOF
+          
+          cat << 'EOF' > TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary/AyuMessageUtils.java
+          package com.radolyn.ayugram.proprietary;
+          public class AyuMessageUtils {
+              public static void dummy() {}
+          }
+          EOF
 
       - uses: DamianReeves/write-file-action@master
         with:
