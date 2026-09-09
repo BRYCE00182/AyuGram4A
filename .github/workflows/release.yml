@@ -15,9 +15,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: false
           fetch-depth: 1
           token: ${{ github.token }}
+
+      - name: Kill proprietary submodule completely
+        run: |
+          git submodule deinit -f TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary || true
+          git rm -f TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary || true
+          rm -rf .git/modules/TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary || true
+          git config -f .gitmodules --remove-section submodule."TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary" || true
+          mkdir -p TMessagesProj/src/main/java/com/radolyn/ayugram/proprietary
 
       - uses: DamianReeves/write-file-action@master
         with:
