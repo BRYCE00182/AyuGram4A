@@ -12,6 +12,7 @@ jobs:
       CCACHE_NOHASHDIR: "true"
       CCACHE_MAXSIZE: "10G"
       CCACHE_HARDLINK: "true"
+      ORG_GRADLE_JVMARGS: "-Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,10 +96,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew assembleAfatRelease
+        run: ./gradlew assembleArm64Release --no-daemon
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: Release APK
-          path: TMessagesProj/build/outputs/apk/afat/release/*.apk
+          path: TMessagesProj/build/outputs/apk/arm64/release/*.apk
